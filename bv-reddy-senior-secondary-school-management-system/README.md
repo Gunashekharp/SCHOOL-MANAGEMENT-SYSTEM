@@ -51,3 +51,45 @@ To install dependencies and run your Google Cloud Vertex AI Studio App locally, 
 
 ```bash
 npm install && npm run dev
+```
+
+## Deploy backend to Vercel (Serverless)
+
+The backend is now structured to support Vercel serverless functions.
+
+- Vercel backend entry: `backend/api/index.js`
+- Shared Express app: `backend/app.js`
+- Local Node server (with WebSocket upgrade support): `backend/server.js`
+
+### Vercel project settings
+
+- Set project root directory to `backend`
+- Vercel uses `backend/vercel.json` to route requests
+
+### Required environment variables on Vercel
+
+- `GOOGLE_CLOUD_PROJECT`
+- `GOOGLE_CLOUD_LOCATION`
+- `PROXY_HEADER` (optional; defaults to frontend shim value)
+- `API_PAYLOAD_MAX_SIZE` (optional)
+
+### Important limitation
+
+`/ws-proxy` is not available in serverless mode and returns `501`.
+If you need websocket proxying for live API traffic, deploy `backend/server.js` on a stateful Node host (VM/Render/Railway/etc.) instead of serverless.
+
+## Deploy frontend to Vercel
+
+### Vercel project settings
+
+- Set project root directory to `frontend`
+- Build command: `npm run build`
+- Output directory: `dist`
+
+### Required frontend environment variable
+
+- `VITE_API_BASE_URL`
+  - Set this to your deployed backend URL, for example: `https://your-backend.vercel.app`
+  - Do not include a trailing slash
+
+The frontend proxy shim reads `VITE_API_BASE_URL` and forwards `/api-proxy` and `/ws-proxy` requests to that backend origin.

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Shield, Users, Building, Plus, X } from 'lucide-react';
+import { Shield, Users, Building, Plus, X, CheckCircle2, XCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
+  const { authAccessRequests, setAccessRequestRole, approveAccessRequest, rejectAccessRequest } = useAuth();
   
   // Security State
   const [mfaEnabled, setMfaEnabled] = useState(true);
@@ -187,6 +189,100 @@ export const Settings: React.FC = () => {
                   >
                     <span className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${autoLogout ? 'translate-x-6' : ''}`} />
                   </button>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-base font-semibold text-brand-navy">Principal Admin Control: Auth Requests</h4>
+                  <span className="text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    Pending: {authAccessRequests.filter((request) => request.status === 'pending').length}
+                  </span>
+                </div>
+
+                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                          <th className="p-3 text-xs font-semibold text-slate-500 uppercase">Method</th>
+                          <th className="p-3 text-xs font-semibold text-slate-500 uppercase">User</th>
+                          <th className="p-3 text-xs font-semibold text-slate-500 uppercase">Identifier</th>
+                          <th className="p-3 text-xs font-semibold text-slate-500 uppercase">Role</th>
+                          <th className="p-3 text-xs font-semibold text-slate-500 uppercase">Status</th>
+                          <th className="p-3 text-xs font-semibold text-slate-500 uppercase">Requested</th>
+                          <th className="p-3 text-right text-xs font-semibold text-slate-500 uppercase">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {authAccessRequests.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="p-4 text-sm text-slate-500 text-center">
+                              No authentication access requests yet.
+                            </td>
+                          </tr>
+                        ) : (
+                          authAccessRequests.map((request) => (
+                            <tr key={request.id} className="hover:bg-slate-50">
+                              <td className="p-3 text-sm text-slate-700 capitalize">{request.method}</td>
+                              <td className="p-3 text-sm text-slate-700">{request.displayName}</td>
+                              <td className="p-3 text-sm text-slate-600">{request.identifier}</td>
+                              <td className="p-3 text-sm text-slate-700">
+                                {request.status === 'pending' ? (
+                                  <select
+                                    value={request.role}
+                                    onChange={(e) => setAccessRequestRole(request.id, e.target.value as 'Admin' | 'Teacher' | 'Student' | 'Parent')}
+                                    className="border border-slate-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-brand-500 outline-none"
+                                  >
+                                    <option value="Teacher">Teacher</option>
+                                    <option value="Student">Student</option>
+                                    <option value="Parent">Parent</option>
+                                    <option value="Admin">Admin</option>
+                                  </select>
+                                ) : (
+                                  request.role
+                                )}
+                              </td>
+                              <td className="p-3 text-sm">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs border ${
+                                    request.status === 'approved'
+                                      ? 'bg-green-50 text-green-700 border-green-200'
+                                      : request.status === 'rejected'
+                                        ? 'bg-red-50 text-red-700 border-red-200'
+                                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                                  }`}
+                                >
+                                  {request.status}
+                                </span>
+                              </td>
+                              <td className="p-3 text-sm text-slate-600">{new Date(request.createdAt).toLocaleString()}</td>
+                              <td className="p-3 text-right">
+                                {request.status === 'pending' ? (
+                                  <div className="inline-flex items-center gap-2">
+                                    <button
+                                      onClick={() => approveAccessRequest(request.id)}
+                                      className="inline-flex items-center text-green-700 hover:text-green-800 text-sm font-medium"
+                                    >
+                                      <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
+                                    </button>
+                                    <button
+                                      onClick={() => rejectAccessRequest(request.id)}
+                                      className="inline-flex items-center text-red-600 hover:text-red-700 text-sm font-medium"
+                                    >
+                                      <XCircle className="w-4 h-4 mr-1" /> Reject
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-slate-500">Reviewed</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 

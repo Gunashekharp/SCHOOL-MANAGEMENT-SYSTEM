@@ -9,6 +9,33 @@
 (function() {
   const originalFetch = window.fetch;
   const originalWebSocket = window.WebSocket;
+  const rawProxyBaseUrl = typeof import.meta !== 'undefined' && import.meta?.env?.VITE_API_BASE_URL
+    ? String(import.meta.env.VITE_API_BASE_URL).trim()
+    : '';
+  const proxyBaseUrl = rawProxyBaseUrl.replace(/\/+$/, '');
+
+  function getHttpProxyUrl(pathname) {
+    return proxyBaseUrl ? `${proxyBaseUrl}${pathname}` : pathname;
+  }
+
+  function getWebSocketProxyUrl(targetUrl) {
+    if (!proxyBaseUrl) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      return `${protocol}//${host}/ws-proxy?target=${targetUrl}`;
+    }
+
+    try {
+      const baseUrl = new URL(proxyBaseUrl);
+      const wsProtocol = baseUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+      const normalizedBasePath = baseUrl.pathname.replace(/\/+$/, '');
+      return `${wsProtocol}//${baseUrl.host}${normalizedBasePath}/ws-proxy?target=${targetUrl}`;
+    } catch {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      return `${protocol}//${host}/ws-proxy?target=${targetUrl}`;
+    }
+  }
 
   // Function to validate VertexGenAi endpoints
   function isValidUrl(url) {
@@ -74,9 +101,7 @@
       
       console.log('[Vertex AI Proxy Shim] Intercepted Vertex WebSocket request:', inputUrl);
       const targetUrl = encodeURIComponent(inputUrl);
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.host;
-      const proxyUrl = `${protocol}//${host}/ws-proxy?target=${targetUrl}`;
+      const proxyUrl = getWebSocketProxyUrl(targetUrl);
       return new originalWebSocket(proxyUrl, protocols);
     }
     return new originalWebSocket(url, protocols);
@@ -117,24 +142,25 @@
           },
           body: JSON.stringify(requestDetails),
         };
+        const apiProxyUrl = getHttpProxyUrl('/api-proxy');
 
-        console.log('[Vertex AI Proxy Shim] Fetching from local Node.js backend: /api-proxy');
-        const proxyResponse = await fetch('/api-proxy', proxyFetchOptions);
+        console.log('[Vertex AI Proxy Shim] Fetching from backend proxy:', apiProxyUrl);
+        const proxyResponse = await fetch(apiProxyUrl, proxyFetchOptions);
 
         if (proxyResponse.status === 401) {
-            console.error('[Vertex Proxy Shim] Local Node.js backend returned 401. Authentication may be needed.');
+            console.error('[Vertex Proxy Shim] Backend proxy returned 401. Authentication may be needed.');
             return proxyResponse; // Return the proxy's 401 response.
         }
 
 
         if (!proxyResponse.ok) {
-          console.error(`[Vertex Proxy Shim] Proxy request to /api-proxy failed with status ${proxyResponse.status}: ${proxyResponse.statusText}`);
+          console.error(`[Vertex Proxy Shim] Proxy request to backend proxy failed with status ${proxyResponse.status}: ${proxyResponse.statusText}`);
           return proxyResponse; // Propagate other non-ok responses from the proxy.
         }
 
         return proxyResponse;
       } catch (error) {
-        console.error('[Vertex AI Proxy Shim] Error fetching from local Node.js backend:', error);
+        console.error('[Vertex AI Proxy Shim] Error fetching from backend proxy:', error);
         return new Response(JSON.stringify({
             error: 'Proxying failed',
             details: error.message, name: error.name,
@@ -142,7 +168,7 @@
           }),
           {
             status: 503, // Service Unavailable
-            statusText: 'Local Proxy Unavailable',
+            statusText: 'Backend Proxy Unavailable',
             headers: { 'Content-Type': 'text/plain' },
           }
         );

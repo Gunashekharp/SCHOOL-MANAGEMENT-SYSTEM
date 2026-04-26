@@ -12,6 +12,19 @@ export interface User {
   employeeId?: string; // For Teacher/Admin role
 }
 
+export type AuthMethod = 'google' | 'phone';
+
+export interface AuthAccessRequest {
+  id: string;
+  method: AuthMethod;
+  identifier: string;
+  displayName: string;
+  role: Role;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  reviewedAt?: string;
+}
+
 export interface Student {
   id: string;
   admissionNo: string;

@@ -2,6 +2,9 @@ import './vertex-ai-proxy-interceptor.js';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { initializeAnalytics } from './firebase';
+
+void initializeAnalytics();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
