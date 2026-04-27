@@ -5,7 +5,6 @@ import { AlertCircle, KeyRound, Lock, Mail, Smartphone } from 'lucide-react';
 import { RecaptchaVerifier, type ConfirmationResult } from 'firebase/auth';
 import { auth } from '../firebase';
 import { SchoolBrand } from '../components/SchoolBrand';
-import { FIREBASE_LOGIN_IDS } from '../constants';
 
 type LoginMode = 'password' | 'google' | 'phone';
 
@@ -237,15 +236,6 @@ export const Login: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600">
-              <p className="font-semibold text-slate-700 mb-2">Firebase Login IDs to create in Firebase Console:</p>
-              <ul className="space-y-1">
-                {FIREBASE_LOGIN_IDS.map((loginId) => (
-                  <li key={loginId}>{loginId}</li>
-                ))}
-              </ul>
             </div>
 
             <div className="flex items-center justify-between">

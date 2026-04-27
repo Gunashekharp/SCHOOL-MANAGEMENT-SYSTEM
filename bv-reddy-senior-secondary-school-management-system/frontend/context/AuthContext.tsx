@@ -26,7 +26,6 @@ interface AuthContextType {
   approveAccessRequest: (requestId: string) => void;
   rejectAccessRequest: (requestId: string) => void;
   logout: () => void;
-  switchRole: (role: Role) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -215,13 +214,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsAuthenticated(false);
   };
 
-  const switchRole = (role: Role) => {
-    const newUser = MOCK_USERS.find(u => u.role === role);
-    if (newUser) {
-      setUser(newUser);
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -236,7 +228,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         approveAccessRequest,
         rejectAccessRequest,
         logout,
-        switchRole,
       }}
     >
       {children}

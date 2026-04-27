@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Sidebar } from './components/Sidebar';
@@ -26,6 +26,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <AuthProvider>
       <Router>
@@ -34,9 +36,9 @@ const App: React.FC = () => {
           <Route path="/*" element={
             <ProtectedRoute>
               <div className="flex h-screen bg-slate-50 overflow-hidden">
-                <Sidebar />
+                <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
                 <div className="flex-1 flex flex-col overflow-hidden">
-                  <Header />
+                  <Header onMenuClick={() => setIsSidebarOpen(true)} />
                   <main className="flex-1 overflow-y-auto">
                     <Routes>
                       <Route path="/" element={<Dashboard />} />

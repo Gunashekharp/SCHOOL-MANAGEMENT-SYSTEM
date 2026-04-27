@@ -7,16 +7,12 @@ interface SchoolBrandProps {
   centered?: boolean;
 }
 
-const sizeStyles: Record<BrandSize, { logo: string; title: string; subtitle: string }> = {
+const sizeStyles: Record<BrandSize, { logo: string }> = {
   sm: {
-    logo: 'h-10 w-10',
-    title: 'text-lg',
-    subtitle: 'text-[10px]',
+    logo: 'h-14 w-[220px]',
   },
   lg: {
-    logo: 'h-14 w-14',
-    title: 'text-3xl',
-    subtitle: 'text-sm',
+    logo: 'h-20 w-[300px]',
   },
 };
 
@@ -25,21 +21,34 @@ export const SchoolBrand: React.FC<SchoolBrandProps> = ({
   centered = false,
 }: SchoolBrandProps) => {
   const styles = sizeStyles[size];
-  const [logoSrc, setLogoSrc] = useState('/school-logo.png');
+  const fallbackSources = ['/school-logo.png', '/school-logo-fallback.png', 'https://www.bvreddyschool.in/images/logo.png'];
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const [showPlaceholder, setShowPlaceholder] = useState(false);
+
+  const handleLogoError = () => {
+    if (sourceIndex < fallbackSources.length - 1) {
+      setSourceIndex((prev: number) => prev + 1);
+      return;
+    }
+
+    setShowPlaceholder(true);
+  };
 
   return (
-    <div className={`flex items-center gap-3 ${centered ? 'justify-center' : ''}`}>
-      <img
-        src={logoSrc}
-        alt="BV Reddy Senior Secondary School"
-        className={`${styles.logo} rounded-full object-cover border border-slate-200`}
-        referrerPolicy="no-referrer"
-        onError={() => setLogoSrc('https://www.bvreddyschool.in/images/logo.png')}
-      />
-      <div className="leading-none">
-        <div className={`font-extrabold tracking-tight text-brand-navy ${styles.title}`}>B.V REDDY</div>
-        <div className={`font-bold tracking-wider text-red-600 ${styles.subtitle}`}>SENIOR SECONDARY SCHOOL</div>
-      </div>
+    <div className={`flex items-center ${centered ? 'justify-center' : ''}`}>
+      {showPlaceholder ? (
+        <div className={`${styles.logo} rounded-md bg-brand-navy text-white border border-slate-200 flex items-center justify-center text-xs font-bold`}>
+          SCHOOL LOGO
+        </div>
+      ) : (
+        <img
+          src={fallbackSources[sourceIndex]}
+          alt="BV Reddy Senior Secondary School"
+          className={`${styles.logo} rounded-md object-contain border border-slate-200 bg-white p-1`}
+          referrerPolicy="no-referrer"
+          onError={handleLogoError}
+        />
+      )}
     </div>
   );
 };

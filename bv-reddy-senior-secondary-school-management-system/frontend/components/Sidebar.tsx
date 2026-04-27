@@ -12,7 +12,8 @@ import {
   Bus, 
   FileBarChart,
   Settings,
-  FileText
+  FileText,
+  X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Role } from '../types';
@@ -24,6 +25,11 @@ interface NavItem {
   label: string;
   roles: Role[];
   category: 'core' | 'operations';
+}
+
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const navItems: NavItem[] = [
@@ -41,7 +47,7 @@ const navItems: NavItem[] = [
   { path: '/reports', icon: FileBarChart, label: 'Reports', roles: ['Admin'], category: 'operations' },
 ];
 
-export const Sidebar: React.FC = () => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
   const filteredNavItems = navItems.filter(item => item.roles.includes(user.role));
@@ -49,10 +55,32 @@ export const Sidebar: React.FC = () => {
   const operationItems = filteredNavItems.filter(item => item.category === 'operations');
 
   return (
-    <aside className="w-64 bg-brand-900 text-slate-300 flex flex-col h-full shadow-xl z-20 relative">
+    <>
+      {isOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          aria-label="Close sidebar"
+          onClick={onClose}
+        />
+      )}
+
+      <aside
+        className={`fixed md:static inset-y-0 left-0 w-64 bg-brand-900 text-slate-300 flex flex-col h-full shadow-xl z-40 transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+      >
       {/* Logo Area */}
-      <div className="h-24 flex items-center justify-center px-4 bg-white border-b border-slate-200 flex-shrink-0">
+      <div className="h-24 flex items-center justify-between px-4 bg-white border-b border-slate-200 flex-shrink-0">
         <SchoolBrand size="sm" />
+        <button
+          type="button"
+          className="md:hidden p-1.5 rounded-md text-slate-500 hover:bg-slate-100"
+          onClick={onClose}
+          aria-label="Close navigation menu"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Navigation Links */}
@@ -64,6 +92,7 @@ export const Sidebar: React.FC = () => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={onClose}
                 className={({ isActive }) =>
                   `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group ${
                     isActive 
@@ -86,6 +115,7 @@ export const Sidebar: React.FC = () => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={onClose}
                 className={({ isActive }) =>
                   `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group ${
                     isActive 
@@ -107,6 +137,7 @@ export const Sidebar: React.FC = () => {
         <div className="p-4 border-t border-brand-800">
           <NavLink
             to="/settings"
+            onClick={onClose}
             className="flex items-center px-3 py-2 rounded-lg hover:bg-brand-800/50 hover:text-white transition-colors text-sm font-medium"
           >
             <Settings className="w-5 h-5 mr-3 text-slate-400" />
@@ -114,6 +145,7 @@ export const Sidebar: React.FC = () => {
           </NavLink>
         </div>
       )}
-    </aside>
+      </aside>
+    </>
   );
 };
