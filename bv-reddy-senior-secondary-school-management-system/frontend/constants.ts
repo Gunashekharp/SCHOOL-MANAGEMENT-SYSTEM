@@ -7,6 +7,13 @@ export const MOCK_USERS: User[] = [
   { id: 'U4', name: 'Rajesh Sharma', role: 'Parent', email: 'rajesh.s@parent.com', childIds: ['1'] },
 ];
 
+export const FIREBASE_LOGIN_IDS = [
+  'admin@bvreddyschool.in',
+  'meera.r@bvreddyschool.in',
+  'aarav.s@student.bvreddyschool.in',
+  'rajesh.s@parent.com',
+];
+
 export const MOCK_STATS: DashboardStats = {
   totalStudents: 2450,
   totalStaff: 185,

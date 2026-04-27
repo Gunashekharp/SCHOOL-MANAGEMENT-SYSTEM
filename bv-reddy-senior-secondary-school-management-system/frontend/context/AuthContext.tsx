@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState, useContext, ReactNode } from
 import {
   ConfirmationResult,
   RecaptchaVerifier,
+  signInWithEmailAndPassword,
   signInWithPhoneNumber,
   signInWithPopup,
   signOut,
@@ -125,8 +126,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw new Error('Email and password are required.');
     }
 
-    const matched = MOCK_USERS.find((mockUser) => mockUser.email.toLowerCase() === email.toLowerCase());
-    setUser(matched || MOCK_USERS[0]);
+    const credential = await signInWithEmailAndPassword(auth, email, pass);
+    const firebaseUser = credential.user;
+    const matched = MOCK_USERS.find(
+      (mockUser) =>
+        firebaseUser.email && mockUser.email.toLowerCase() === firebaseUser.email.toLowerCase(),
+    );
+    const role = matched?.role || 'Teacher';
+
+    setUser(mapFirebaseUserToAppUser(firebaseUser, role));
     setIsAuthenticated(true);
   };
 

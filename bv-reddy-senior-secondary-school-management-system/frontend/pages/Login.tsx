@@ -4,13 +4,15 @@ import { useAuth } from '../context/AuthContext';
 import { AlertCircle, KeyRound, Lock, Mail, Smartphone } from 'lucide-react';
 import { RecaptchaVerifier, type ConfirmationResult } from 'firebase/auth';
 import { auth } from '../firebase';
+import { SchoolBrand } from '../components/SchoolBrand';
+import { FIREBASE_LOGIN_IDS } from '../constants';
 
 type LoginMode = 'password' | 'google' | 'phone';
 
 export const Login: React.FC = () => {
   const [mode, setMode] = useState<LoginMode>('password');
-  const [email, setEmail] = useState('admin@bvreddyschool.in');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
@@ -128,12 +130,7 @@ export const Login: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="bg-white px-8 py-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center min-h-[100px] min-w-[280px]">
-            <img 
-              src="https://www.bvreddyschool.in/images/logo.png" 
-              alt="BV Reddy Senior Secondary School" 
-              className="h-16 sm:h-20 w-auto object-contain"
-              referrerPolicy="no-referrer"
-            />
+            <SchoolBrand size="lg" centered />
           </div>
         </div>
         <h2 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-brand-navy tracking-tight">
@@ -216,7 +213,7 @@ export const Login: React.FC = () => {
                   type="email"
                   required
                   className="focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm border-slate-300 rounded-lg py-2.5 border outline-none transition-colors"
-                  placeholder="you@example.com"
+                  placeholder="Enter your Firebase email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -235,11 +232,20 @@ export const Login: React.FC = () => {
                   type="password"
                   required
                   className="focus:ring-brand-500 focus:border-brand-500 block w-full pl-10 sm:text-sm border-slate-300 rounded-lg py-2.5 border outline-none transition-colors"
-                  placeholder="••••••••"
+                  placeholder="Enter your Firebase password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600">
+              <p className="font-semibold text-slate-700 mb-2">Firebase Login IDs to create in Firebase Console:</p>
+              <ul className="space-y-1">
+                {FIREBASE_LOGIN_IDS.map((loginId) => (
+                  <li key={loginId}>{loginId}</li>
+                ))}
+              </ul>
             </div>
 
             <div className="flex items-center justify-between">

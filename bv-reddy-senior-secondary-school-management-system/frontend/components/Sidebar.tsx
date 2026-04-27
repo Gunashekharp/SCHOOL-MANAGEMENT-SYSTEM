@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Role } from '../types';
+import { SchoolBrand } from './SchoolBrand';
 
 interface NavItem {
   path: string;
@@ -51,12 +52,7 @@ export const Sidebar: React.FC = () => {
     <aside className="w-64 bg-brand-900 text-slate-300 flex flex-col h-full shadow-xl z-20 relative">
       {/* Logo Area */}
       <div className="h-24 flex items-center justify-center px-4 bg-white border-b border-slate-200 flex-shrink-0">
-        <img 
-          src="https://www.bvreddyschool.in/images/logo.png" 
-          alt="BV Reddy Senior Secondary School" 
-          className="h-16 w-auto object-contain"
-          referrerPolicy="no-referrer"
-        />
+        <SchoolBrand size="sm" />
       </div>
 
       {/* Navigation Links */}
